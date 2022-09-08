@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.1</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.monitev</groupId>
+	<artifactId>devices</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>devices</name>
+	<description>Obtener dispositivos clientes monitev</description>
+	<properties>
+		<java.version>11</java.version>
+		<start-class>com.monitev.devices.DevicesApplication</start-class>
+		<maven.test.skip>true</maven.test.skip>
+		<proguard.version>7.0.0</proguard.version>
+        <proguard.maven.plugin.version>2.3.1</proguard.maven.plugin.version>
+        <lombok.version>1.18.20</lombok.version>
+	</properties>
+	<scm>
+		<url>https://github.com/wvengen/proguard-maven-plugin</url>
+		<connection>scm:git:git://github.com/wvengen/proguard-maven-plugin.git</connection>
+	  <tag>proguard-maven-plugin-2.3.0</tag>
+  	</scm>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			 <exclusions>
+		        <exclusion>
+		            <groupId>org.springframework.boot</groupId>
+		            <artifactId>spring-boot-starter-logging</artifactId>
+		        </exclusion>
+		    </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>com.lmax</groupId>
+		    <artifactId>disruptor</artifactId>
+		    <version>3.3.7</version>
+		</dependency>
+		 <dependency>
+	        <groupId>org.thingsboard</groupId>
+	        <artifactId>rest-client</artifactId>
+	        <version>3.3.4.1</version>
+	    </dependency>	
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>4.1.2</version>
+		</dependency>
+		<dependency>
+    		<groupId>com.aspose</groupId>
+		    <artifactId>aspose-cells</artifactId>
+		    <version>21.8</version>
+		</dependency>
+		<dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20220320</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.yworks</groupId>
+		    <artifactId>yguard</artifactId>
+		    <version>3.1.0</version>
+		    <scope>compile</scope>
+		</dependency>
+		<dependency>
+		   <groupId>ru.mynewtons</groupId>
+		   <artifactId>spring-boot-firebase-starter</artifactId>
+		   <version>1.0.0</version>
+		</dependency>
+	</dependencies>
+	<repositories>
+    <repository>
+        <id>thingsboard</id>
+        <url>https://repo.thingsboard.io/artifactory/libs-release-public</url>
+    </repository>
+    <repository>
+	    <id>AsposeJavaAPI</id>
+	    <name>Aspose Java API</name>
+	    <url>https://repository.aspose.com/repo/</url>
+	</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			 <plugin>
+	            <groupId>org.springframework.boot</groupId>
+	            <artifactId>spring-boot-maven-plugin</artifactId>             
+	            <configuration>
+	                <mainClass>com.monitev.devices.DevicesApplication</mainClass>
+	                <excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
+				</configuration>
+			</plugin>
+			<plugin>
+			    <artifactId>maven-antrun-plugin</artifactId>
+			    <version>1.8</version>
+			    <executions>
+			        <execution>
+			            <phase>package</phase>
+			            <goals>
+			                <goal>run</goal>
+			            </goals>
+			            <id>obfuscate</id>
+			            <configuration>
+                      <tasks>
+                        <property name="runtime_classpath" refid="maven.runtime.classpath"/>
+                        <taskdef name="yguard" classname="com.yworks.yguard.YGuardTask" classpath="${runtime_classpath}"/>
+                        <yguard>
+                            <inoutpair in="${project.build.directory}/${project.build.finalName}.jar" out="${project.build.directory}/${project.build.finalName}_obfuscated.jar" /> 
+                            <rename mainclass="com.monitev.devices.DevicesApplication" logfile="${project.build.directory}/yguard.log.xml">
+                            	<adjust replaceContent="true">
+                                <!-- plain-text class names in the config files will -->
+                                <!-- be replaced with the obfuscated name versions -->
+                                <include name="**/*.properties"/>
+                              </adjust>
+                              <adjust replacePath="false">
+                                <!-- keep the complete path to the resources even if -->
+                                <!-- package com.yworks.example gets obfuscated by name -->
+                                <include name="com/yworks/example/resources/*"/>
+                              </adjust>
+                              <adjust replaceName="true">
+                                <!-- Replace the .properties files' names with the obfuscated -->
+                                <!-- versions if the corresponding .class files get obfuscated -->
+                                <include name="**/*.properties"/>
+                              </adjust>
+                            </rename> 
+                              <shrink logfile="${project.build.directory}/yshrink.log.xml">
+                                <keep>
+                                    <!-- main method -->
+                                    <method name="void main(java.lang.String[])" class="${mainclass}" /> 
+                                    <class>
+					                    <patternset>
+					                        <!-- Custom library - should be obfuscated -->
+					                        <include name="com.acme.**.*" />
+					                        <include name="A.A.A.A" />
+					                        <!-- Excluded library -->					                       
+					                    </patternset>
+					                </class>                                 
+                                </keep>
+                            </shrink>                          
+                        </yguard>
+                      </tasks>
+                  </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-resources-plugin</artifactId>
+			    <version>3.1.0</version><!--$NO-MVN-MAN-VER$-->
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
